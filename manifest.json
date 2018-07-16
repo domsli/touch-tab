@@ -1,0 +1,29 @@
+{
+  "manifest_version": 2,
+  "name": "Touch Tab",
+  "version": "1.0",
+
+  "description": "Give the browser the same functionality as Sublime Text's Ctrl+P.",
+
+  "permissions": [
+    "tabs"
+  ],
+
+  "browser_action": {
+    "browser_style": true,
+    "default_title": "Touch Tab",
+    "default_popup": "popup.html"
+  },
+
+  "commands": {
+    "_execute_browser_action": {
+      "suggested_key": {
+        "default": "Alt+P"
+      }
+    }
+},
+
+  "background": {
+    "scripts": ["background.js"]
+  }
+}

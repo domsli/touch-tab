@@ -1,0 +1,8 @@
+.tt-active-candidate {
+  background-color: yellow;
+}
+
+.tt-candidate {
+  width: 750px;
+  white-space: nowrap;
+}

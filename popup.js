@@ -18,26 +18,35 @@ browser.runtime.onMessage.addListener(function() {
   // Focus on input and list initial candidates
   const input = document.getElementById('tt-query-input')
   input.focus();
-  listCandidateTabs(input.value);
+  listCandidateTabs(input.value, false);
+
+  // input.addEventListener('blur', (evt) => {
+  //   input.focus();
+  // })
 
   // Add a listener to the input so that candidates are repopulated
   input.addEventListener('input', function(evt) {
     let queryStr = evt.target.value;
+    queryStr = queryStr.toLowerCase();
     listCandidateTabs(queryStr);
   });
+
 });
 
-const listCandidateTabs = function(queryStr) {
+const listCandidateTabs = function(queryStr, shouldActivateWithNewCandidate=true) {
   browser.tabs.query({currentWindow: true})
     .then((tabs) => {
       const matchingTabs = getMatchingTabs(tabs, queryStr);
       populateCandidateTabsContainer(matchingTabs);
+      tabSelectionMaintainer.reload(shouldActivateWithNewCandidate);
     });
 };
 
 const getMatchingTabs = function(tabs, queryStr) {
   const matches = tabs.filter((tab) => {
-    return (tab.url.includes(queryStr) || tab.title.includes(queryStr));
+    return (!tab.url.startsWith("about:") &&
+      (tab.url.toLowerCase().includes(queryStr) ||
+        tab.title.toLowerCase().includes(queryStr)));
   });
   return matches;
 };
@@ -46,8 +55,145 @@ const populateCandidateTabsContainer = function(tabs) {
   const container = document.getElementById('tt-candidate-tabs');
   container.innerHTML = "";
   for (let tab of tabs) {
+    const row = document.createElement('tr');
+    row.setAttribute('id', 'tt-' + tab.id);
+    row.setAttribute('class', 'tt-candidate');
+    // create a cell for icon
+    const favicon = document.createElement('img');
+    favicon.setAttribute('src', tab.favIconUrl);
+    favicon.setAttribute('height', '32');
+    const iconCell = document.createElement('td');
+    iconCell.appendChild(favicon);
+    row.appendChild(iconCell);
+    // create a cell for url
     const p = document.createElement('p');
     p.innerHTML = tab.url;
-    container.appendChild(p);
+    const urlCell = document.createElement('td');
+    urlCell.setAttribute('class', 'tt-candidate-url');
+    urlCell.appendChild(p);
+    row.appendChild(urlCell);
+    container.appendChild(row);
   }
 };
+
+const TabSelectionMaintainer = function() {
+  this.selectedTabId = null;
+
+  this.down = function() {
+    if (this.selectedTabId != null) {
+      const activeP = document.getElementById('tt-' + this.selectedTabId);
+      const nextP = activeP.nextSibling;
+      // activate next candidate if it exists
+      if (nextP) {
+        this.deactivateCandidateElem_(activeP);
+        this.activateCandidateElem_(nextP);
+        return;
+      }
+    }
+    const firstChildP = document.getElementById('tt-candidate-tabs').firstChild;
+    // activate first child if it exists
+    if (firstChildP) {
+      if (this.selectedTabId != null) {
+        const activeP = document.getElementById('tt-' + this.selectedTabId);
+        this.deactivateCandidateElem_(activeP);
+      }
+      this.activateCandidateElem_(firstChildP);
+    }
+  };
+
+  this.up = function() {
+    if (this.selectedTabId != null) {
+      const activeP = document.getElementById('tt-' + this.selectedTabId);
+      const prevP = activeP.previousSibling;
+      // activate previous candidate if it exists
+      if (prevP) {
+        this.deactivateCandidateElem_(activeP);
+        this.activateCandidateElem_(prevP);
+        return;
+      }
+    }
+    const lastChildP = document.getElementById('tt-candidate-tabs').lastChild;
+    // activate last child if it exists
+    if (lastChildP) {
+      if (this.selectedTabId != null) {
+        const activeP = document.getElementById('tt-' + this.selectedTabId);
+        this.deactivateCandidateElem_(activeP);
+      }
+      this.activateCandidateElem_(lastChildP);
+    }
+  };
+
+  this.reload = function(shouldActivateWithNewCandidate) {
+    if (this.selectedTabId != null) {
+      const activeP = document.getElementById('tt-' + this.selectedTabId);
+      // re-activate this if it exists
+      if (activeP) {
+        this.activateCandidateElem_(activeP);
+      }
+      // activate first child if we should be activating with a new candidate
+      else if (shouldActivateWithNewCandidate) {
+        const firstChildP = document.getElementById('tt-candidate-tabs').firstChild;
+        if (firstChildP) {
+          this.activateCandidateElem_(firstChildP);
+        }
+      }
+    }
+    else if (shouldActivateWithNewCandidate) {
+      const firstChildP = document.getElementById('tt-candidate-tabs').firstChild;
+      if (firstChildP) {
+        this.activateCandidateElem_(firstChildP);
+      }
+    }
+  };
+
+  this.extractIdFromCandidateElem_ = function(candidateElem) {
+    return +(candidateElem.getAttribute('id').substring(3));
+  };
+
+  this.deactivateCandidateElem_ = function(candidateElem) {
+    candidateElem.classList.remove('tt-active-candidate');
+  };
+
+  this.activateCandidateElem_ = function(candidateElem) {
+    candidateElem.classList.add('tt-active-candidate');
+    candidateElem.scrollIntoView();
+    const tabId = this.extractIdFromCandidateElem_(candidateElem);
+
+    const self = this;
+    // only need to change page if selected tabId different from
+    // the one we want to change to
+    if (this.selectedTabId != tabId) {
+      this.selectedTabId = tabId;
+    }
+  };
+
+  this.focusInput = function() {
+    const input = document.getElementById('tt-query-input');
+    input.focus();
+  };
+
+  return this;
+};
+
+tabSelectionMaintainer = TabSelectionMaintainer();
+
+document.addEventListener('keydown', (evt) => {
+  if (evt.keyCode == 38) {
+    tabSelectionMaintainer.up();
+  }
+  else if (evt.keyCode == 40) {
+    tabSelectionMaintainer.down();
+  }
+  else if (evt.keyCode == 13) {
+    if (this.selectedTabId) {
+      browser.tabs.update(this.selectedTabId, {active: true})
+        .then(() => {
+          tabSelectionMaintainer.focusInput();
+          browser.tabs.sendMessage(this.selectedTabId, {command:'unfocus'})
+            .then(() => {
+              tabSelectionMaintainer.focusInput();
+            });
+        });
+    }
+  }
+});

@@ -164,6 +164,7 @@ const TabSelectionMaintainer = function() {
 
   this.deactivateCandidateElem_ = function(candidateElem) {
     candidateElem.classList.remove('tt-active-candidate');
+    candidateElem.classList.remove('tt-entered-candidate');
   };
 
   this.activateCandidateElem_ = function(candidateElem) {
@@ -176,6 +177,7 @@ const TabSelectionMaintainer = function() {
     // the one we want to change to
     if (this.selectedTabId != tabId) {
       this.selectedTabId = tabId;
+      enteredTabId = null;
     }
   };
 
@@ -189,6 +191,8 @@ const TabSelectionMaintainer = function() {
 
 tabSelectionMaintainer = TabSelectionMaintainer();
 
+let enteredTabId = null;
+
 document.addEventListener('keydown', (evt) => {
   if (evt.keyCode == 38) {
     tabSelectionMaintainer.up();
@@ -198,7 +202,15 @@ document.addEventListener('keydown', (evt) => {
   }
   else if (evt.keyCode == 13) {
     if (this.selectedTabId) {
-      browser.tabs.update(this.selectedTabId, {active: true})
+      if (this.selectedTabId == enteredTabId) {
+        window.close();
+      }
+      else {
+        browser.tabs.update(this.selectedTabId, {active: true})
+          .then(() => {
+            enteredTabId = this.selectedTabId;
+          });
+      }
     }
   }
 });

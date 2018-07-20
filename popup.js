@@ -66,17 +66,23 @@ const populateCandidateTabsContainer = function(tabs) {
     // create a cell for icon
     const favicon = document.createElement('img');
     favicon.setAttribute('src', tab.favIconUrl);
-    favicon.setAttribute('height', '32');
+    favicon.setAttribute('height', '24px');
     const iconCell = document.createElement('td');
     iconCell.appendChild(favicon);
     row.appendChild(iconCell);
-    // create a cell for url
-    const p = document.createElement('p');
-    p.innerHTML = tab.url;
-    const urlCell = document.createElement('td');
-    urlCell.setAttribute('class', 'tt-candidate-url');
-    urlCell.appendChild(p);
-    row.appendChild(urlCell);
+    // create a cell for title/url
+    const titleUrlCell = document.createElement('td');
+    titleUrlCell.setAttribute('class', 'tt-candidate-title-url');
+    const title = document.createElement('p');
+    title.setAttribute('class', 'tt-candidate-title');
+    title.innerHTML = tab.title;
+    titleUrlCell.appendChild(title);
+    const br = document.createElement('br');
+    const url = document.createElement('p');
+    url.setAttribute('class', 'tt-candidate-url');
+    url.innerHTML = tab.url;
+    titleUrlCell.appendChild(url);
+    row.appendChild(titleUrlCell);
     container.appendChild(row);
   }
   return didActivateCandidate;

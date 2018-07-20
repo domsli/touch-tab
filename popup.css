@@ -2,7 +2,20 @@
   background-color: yellow;
 }
 
-.tt-candidate {
-  width: 750px;
-  white-space: nowrap;
+.tt-candidate img {
+  margin: 5px 5px 5px 5px;
+}
+
+.tt-candidate-title-url p {
+  overflow: hidden;
+  min-width: 600px;
+  margin: 0;
+}
+
+.tt-candidate-title {
+  font-size: 10pt;
+}
+
+.tt-candidate-url {
+  color: gray;
 }

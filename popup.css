@@ -2,6 +2,10 @@
   background-color: rgba(211, 211, 211, 0.5);
 }
 
+#tt-query-input {
+  min-width: 700px;
+}
+
 #tt-candidate-tabs {
   display: block;
   max-height: 500px;
@@ -16,8 +20,12 @@
   margin: 5px 5px 5px 5px;
 }
 
+.tt-candidate-title-url {
+  width: 100%;
+}
+
 .tt-candidate-title-url p {
-  min-width: 600px;
+  width: 100%;
   margin: 0;
 }
 

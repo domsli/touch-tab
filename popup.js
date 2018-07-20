@@ -18,7 +18,7 @@ browser.runtime.onMessage.addListener(function() {
   // Focus on input and list initial candidates
   const input = document.getElementById('tt-query-input')
   input.focus();
-  listCandidateTabs(input.value, false);
+  listCandidateTabs(input.value);
 
   // input.addEventListener('blur', (evt) => {
   //   input.focus();
@@ -33,12 +33,12 @@ browser.runtime.onMessage.addListener(function() {
 
 });
 
-const listCandidateTabs = function(queryStr, shouldActivateWithNewCandidate=true) {
+const listCandidateTabs = function(queryStr) {
   browser.tabs.query({currentWindow: true})
     .then((tabs) => {
       const matchingTabs = getMatchingTabs(tabs, queryStr);
-      populateCandidateTabsContainer(matchingTabs);
-      tabSelectionMaintainer.reload(shouldActivateWithNewCandidate);
+      const didActivateCandidate = populateCandidateTabsContainer(matchingTabs);
+      tabSelectionMaintainer.reload(!didActivateCandidate);
     });
 };
 
@@ -54,10 +54,15 @@ const getMatchingTabs = function(tabs, queryStr) {
 const populateCandidateTabsContainer = function(tabs) {
   const container = document.getElementById('tt-candidate-tabs');
   container.innerHTML = "";
+  let didActivateCandidate = false;
   for (let tab of tabs) {
     const row = document.createElement('tr');
     row.setAttribute('id', 'tt-' + tab.id);
     row.setAttribute('class', 'tt-candidate');
+    if (!this.selectedTabId && tab.active) {
+      didActivateCandidate = true;
+      tabSelectionMaintainer.activateCandidateElem_(row);
+    }
     // create a cell for icon
     const favicon = document.createElement('img');
     favicon.setAttribute('src', tab.favIconUrl);
@@ -74,6 +79,7 @@ const populateCandidateTabsContainer = function(tabs) {
     row.appendChild(urlCell);
     container.appendChild(row);
   }
+  return didActivateCandidate;
 };
 
 const TabSelectionMaintainer = function() {
@@ -187,13 +193,23 @@ document.addEventListener('keydown', (evt) => {
   else if (evt.keyCode == 13) {
     if (this.selectedTabId) {
       browser.tabs.update(this.selectedTabId, {active: true})
-        .then(() => {
-          tabSelectionMaintainer.focusInput();
-          browser.tabs.sendMessage(this.selectedTabId, {command:'unfocus'})
-            .then(() => {
-              tabSelectionMaintainer.focusInput();
-            });
-        });
     }
   }
+});
+
+const reloadCandidateTabs = function() {
+  const input = document.getElementById('tt-query-input');
+  let queryStr = input.value;
+  queryStr = queryStr.toLowerCase();
+  listCandidateTabs(queryStr);
+};
+
+browser.tabs.onUpdated.addListener(reloadCandidateTabs);
+browser.tabs.onRemoved.addListener(reloadCandidateTabs);
+browser.tabs.onActivated.addListener((tab) => {
+  tabSelectionMaintainer.focusInput();
+  browser.tabs.sendMessage(tab.tabId, {command:'unfocus'})
+    .then(() => {
+      tabSelectionMaintainer.focusInput();
+    });
 });

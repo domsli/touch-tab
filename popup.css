@@ -2,12 +2,21 @@
   background-color: yellow;
 }
 
+#tt-candidate-tabs {
+  display: block;
+  max-height: 500px;
+  overflow-y: scroll;
+}
+
+.tt-candidate {
+  height: 50px;
+}
+
 .tt-candidate img {
   margin: 5px 5px 5px 5px;
 }
 
 .tt-candidate-title-url p {
-  overflow: hidden;
   min-width: 600px;
   margin: 0;
 }

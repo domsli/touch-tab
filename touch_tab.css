@@ -1,0 +1,99 @@
+#touch-tab {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 20000;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+
+    background-color: none;
+    -moz-transition: background-color 0.2s;
+    -moz-transition-timing-function: linear;
+}
+
+#touch-tab.opened {
+    background-color: rgba(211, 211, 211, 0.3);
+    -moz-transition: background-color 0.2s;
+    -moz-transition-timing-function: linear;
+}
+
+#touch-tab .touch-tab--content {
+    background-color: rgba(255, 255, 255, 0.9);
+    width: 80vw;
+    height: 75vh;
+    padding: 25px;
+    pointer-events: all;
+}
+
+#touch-tab .touch-tab--components {
+    height: 100%;
+}
+
+#touch-tab .touch-tab--filter-container {
+    width: 100%;
+    font-size: 14pt;
+    height: 24px;
+    margin-top: 5px;
+    margin-bottom: 10px;
+}
+
+#touch-tab .touch-tab--filter {
+    width: 100%;
+    margin-bottom: 5px;
+    color: gray;
+    border: none;
+    background-color: transparent;
+}
+
+#touch-tab .touch-tab--filter-underline {
+    width: 100%;
+    height: 2px;
+    background-color: rgba(211, 211, 211, 0.5);
+    -moz-transition: background-color 0.1s;
+    -moz-transition-timing-function: ease-out;
+}
+
+#touch-tab.active .touch-tab--filter-underline {
+    background-color: #FD5912;
+    -moz-transition: background-color 0.3s;
+    -moz-transition-timing-function: ease;
+}
+
+#touch-tab .touch-tab--candidates-container {
+    display: block;
+    max-height: calc(100% - 10px - 5px - 24px);
+    overflow-y: auto;
+}
+
+.touch-tab--candidate {
+    width: 100%;
+    height: 50px;
+}
+
+.touch-tab--candidate img {
+    margin: 5px 15px 5px 5px;
+}
+
+.touch-tab--candidate-title-url {
+    width: 100%;
+}
+
+.touch-tab--candidate-title-url p {
+    width: 100%;
+    overflow-x:; auto;
+    white-space: nowrap;
+}
+
+.touch-tab--candidate-title {
+    font-size: 10pt;
+}
+
+.touch-tab--candidate-url {
+    color: gray;
+}

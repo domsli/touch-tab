@@ -6,22 +6,9 @@
   "description": "Give the browser the same functionality as Sublime Text's Ctrl+P.",
 
   "permissions": [
-    "tabs"
+    "tabs",
+    "<all_urls>"
   ],
-
-  "browser_action": {
-    "browser_style": true,
-    "default_title": "Touch Tab",
-    "default_popup": "popup.html"
-  },
-
-  "commands": {
-    "_execute_browser_action": {
-      "suggested_key": {
-        "default": "Alt+P"
-      }
-    }
-},
 
   "background": {
     "scripts": ["background.js"]
@@ -30,7 +17,10 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content_scripts/unfocus.js"]
+      "css": ["touch_tab.css"],
+      "js": ["content_scripts/touch_tab.js"]
     }
-  ]
+  ],
+
+  "web_accessible_resources": ["touch_tab.html"]
 }

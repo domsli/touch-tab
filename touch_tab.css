@@ -76,6 +76,10 @@
     height: 50px;
 }
 
+.touch-tab--candidate.active {
+    background-color: rgba(211, 211, 211, 0.7);
+}
+
 .touch-tab--candidate img {
     margin: 5px 15px 5px 5px;
 }

@@ -50,6 +50,84 @@
     }
   };
 
+  const TabSelectionMaintainer = function() {
+    this.selectedTabId = null;
+
+    this.getSelectedTabId = function() {
+      return this.selectedTabId;
+    };
+
+    this.down = function() {
+      if (this.selectedTabId != null) {
+        const activeP = document.getElementById('touch-tab--' + this.selectedTabId);
+        const nextP = activeP.nextSibling;
+        // activate next candidate if it exists
+        if (nextP) {
+          this.deactivateCandidateElem(activeP);
+          this.activateCandidateElem(nextP);
+          return;
+        }
+      }
+      const firstChildP = document.querySelector('.touch-tab--candidates-container').firstChild;
+      // activate first child if it exists
+      if (firstChildP) {
+        if (this.selectedTabId != null) {
+          const activeP = document.getElementById('touch-tab--' + this.selectedTabId);
+          this.deactivateCandidateElem(activeP);
+        }
+        this.activateCandidateElem(firstChildP);
+      }
+    };
+
+    this.up = function() {
+      if (this.selectedTabId != null) {
+        const activeP = document.getElementById('touch-tab--' + this.selectedTabId);
+        const prevP = activeP.previousSibling;
+        // activate previous candidate if it exists
+        if (prevP) {
+          this.deactivateCandidateElem(activeP);
+          this.activateCandidateElem(prevP);
+          return;
+        }
+      }
+      const lastChildP = document.querySelector('.touch-tab--candidates-container').lastChild;
+      // activate last child if it exists
+      if (lastChildP) {
+        if (this.selectedTabId != null) {
+          const activeP = document.getElementById('touch-tab--' + this.selectedTabId);
+          this.deactivateCandidateElem(activeP);
+        }
+        this.activateCandidateElem(lastChildP);
+      }
+    };
+
+    this.deactivateCandidateElem = function(candidateElem) {
+      candidateElem.classList.remove('active');
+      console.log("Deactivated a candidate");
+    };
+
+    this.activateCandidateElem = function(candidateElem) {
+      candidateElem.classList.add('active');
+      candidateElem.scrollIntoView({block: 'center'});
+      const tabId = this.extractIdFromCandidateElem_(candidateElem);
+
+      const self = this;
+      // only need to change page if selected tabId different from
+      // the one we want to change to
+      if (this.selectedTabId != tabId) {
+        this.selectedTabId = tabId;
+      }
+    };
+
+    this.extractIdFromCandidateElem_ = function(candidateElem) {
+      return +(candidateElem.getAttribute('id').substring('touch-tab--'.length));
+    };
+
+    return this;
+  };
+
+  const tabSelectionMaintainer = TabSelectionMaintainer();
+
   // Listen to command keypresses
   document.addEventListener('keypress', (evt) => {
     // Ctrl+Alt+P is the main command to open popup
@@ -63,6 +141,12 @@
       else {  
         browser.runtime.sendMessage({command: 'tabs'});
       }
+    }
+    else if (evt.key == "ArrowDown") {
+      tabSelectionMaintainer.down();
+    }
+    else if (evt.key == "ArrowUp") {
+      tabSelectionMaintainer.up();
     }
     // Esc will close the content
     else if (evt.key == "Escape") {

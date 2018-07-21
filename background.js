@@ -13,4 +13,7 @@ browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         browser.tabs.sendMessage(activeTab.id, {info: 'tabs', data: tabs});
       });
   }
+  else if (message.command == "activate") {
+    browser.tabs.update(message.tabId, {active: true});
+  }
 });

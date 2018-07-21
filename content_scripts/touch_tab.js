@@ -14,6 +14,10 @@
     if (evt.cancelBubble != null) evt.cancelBubble = true;
   }
 
+  const isOpened = function() {
+    return div.classList.contains('opened');
+  }
+
   const closeTouchTab = function() {
     div.classList.remove('opened');
     div.style.pointerEvents = 'none';
@@ -103,7 +107,6 @@
 
     this.deactivateCandidateElem = function(candidateElem) {
       candidateElem.classList.remove('active');
-      console.log("Deactivated a candidate");
     };
 
     this.activateCandidateElem = function(candidateElem) {
@@ -133,7 +136,7 @@
     // Ctrl+Alt+P is the main command to open popup
     if (evt.ctrlKey & evt.altKey && evt.which == 112) {
       // Close the Touch Tab content if it is already open
-      if (div.classList.contains('opened')) {
+      if (isOpened()) {
         closeTouchTab();
       }
       // Ask background script for tabs so that this content
@@ -143,14 +146,26 @@
       }
     }
     else if (evt.key == "ArrowDown") {
-      tabSelectionMaintainer.down();
+      if (isOpened()) {
+        tabSelectionMaintainer.down();
+      }
     }
     else if (evt.key == "ArrowUp") {
-      tabSelectionMaintainer.up();
+      if (isOpened()) {
+        tabSelectionMaintainer.up();
+      }
     }
     // Esc will close the content
     else if (evt.key == "Escape") {
       closeTouchTab();
+    }
+    else if (evt.key == "Enter") {
+      if (isOpened()) {
+        const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
+        if (selectedTabId) {
+          browser.runtime.sendMessage({command: 'activate', tabId: selectedTabId});
+        }
+      }
     }
   });
 

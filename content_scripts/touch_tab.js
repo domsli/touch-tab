@@ -24,35 +24,45 @@
     div.removeChild(content);
   };
 
-  const populateCandidateTabsContainer = function(tabs, container) {
-    container.innerHTML = "";
-    for (let tab of tabs) {
-      const row = document.createElement('tr');
-      row.setAttribute('id', 'touch-tab--' + tab.id);
-      row.setAttribute('class', 'touch-tab--candidate');
-      // create a cell for icon
-      const favicon = document.createElement('img');
-      favicon.setAttribute('src', tab.favIconUrl);
-      favicon.setAttribute('height', '32px');
-      const iconCell = document.createElement('td');
-      iconCell.setAttribute('class', 'touch-tab--candidate-favicon');
-      iconCell.appendChild(favicon);
-      row.appendChild(iconCell);
-      // create a cell for title/url
-      const titleUrlCell = document.createElement('td');
-      titleUrlCell.setAttribute('class', 'touch-tab--candidate-title-url');
-      const title = document.createElement('p');
-      title.setAttribute('class', 'touch-tab--candidate-title');
-      title.innerHTML = tab.title;
-      titleUrlCell.appendChild(title);
-      const br = document.createElement('br');
-      const url = document.createElement('p');
-      url.setAttribute('class', 'touch-tab--candidate-url');
-      url.innerHTML = tab.url;
-      titleUrlCell.appendChild(url);
-      row.appendChild(titleUrlCell);
-      container.appendChild(row);
-    }
+  const CandidateTabsManager = function() {
+    this.populateCandidateTabsContainer = function(tabs, container, activeTabId) {
+      container.innerHTML = "";
+      const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
+      let idOfTabToActivate = (selectedTabId != null) ? selectedTabId : activeTabId;
+      for (let tab of tabs) {
+        const row = document.createElement('tr');
+        row.setAttribute('id', 'touch-tab--' + tab.id);
+        row.setAttribute('class', 'touch-tab--candidate');
+        // create a cell for icon
+        const favicon = document.createElement('img');
+        favicon.setAttribute('src', tab.favIconUrl);
+        favicon.setAttribute('height', '32px');
+        const iconCell = document.createElement('td');
+        iconCell.setAttribute('class', 'touch-tab--candidate-favicon');
+        iconCell.appendChild(favicon);
+        row.appendChild(iconCell);
+        // create a cell for title/url
+        const titleUrlCell = document.createElement('td');
+        titleUrlCell.setAttribute('class', 'touch-tab--candidate-title-url');
+        const title = document.createElement('p');
+        title.setAttribute('class', 'touch-tab--candidate-title');
+        title.innerHTML = tab.title;
+        titleUrlCell.appendChild(title);
+        const br = document.createElement('br');
+        const url = document.createElement('p');
+        url.setAttribute('class', 'touch-tab--candidate-url');
+        url.innerHTML = tab.url;
+        titleUrlCell.appendChild(url);
+        row.appendChild(titleUrlCell);
+        container.appendChild(row);
+
+        if (idOfTabToActivate != null && tab.id == idOfTabToActivate) {
+          tabSelectionMaintainer.activateCandidateElem(row);
+        }
+      }
+    };
+
+    return this;
   };
 
   const TabSelectionMaintainer = function() {
@@ -131,6 +141,7 @@
   };
 
   const tabSelectionMaintainer = TabSelectionMaintainer();
+  const candidateTabsManager = CandidateTabsManager();
 
   // Listen to command keypresses
   document.addEventListener('keypress', (evt) => {
@@ -205,9 +216,10 @@
           input.focus();
 
           // Populate container with tab candidates
-          const tabs = message.data;
+          const tabs = message.tabs;
+          const activeTab = message.activeTab;
           const container = document.querySelector('.touch-tab--candidates-container');
-          populateCandidateTabsContainer(tabs, container);
+          candidateTabsManager.populateCandidateTabsContainer(tabs, container, activeTab.id);
         } else {
           console.log('files not found');
         }

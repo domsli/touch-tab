@@ -8,9 +8,8 @@ browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   if (message.command == 'tabs') {
     browser.tabs.query({currentWindow: true})
       .then((tabs) => {
-        console.log(tabs);
         const activeTab = tabs.find((tab) => {return tab.active});
-        browser.tabs.sendMessage(activeTab.id, {info: 'tabs', data: tabs});
+        browser.tabs.sendMessage(activeTab.id, {info: 'tabs', tabs: tabs, activeTab: activeTab});
       });
   }
   else if (message.command == "activate") {

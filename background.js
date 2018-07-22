@@ -4,15 +4,24 @@
  * back to the popup as a signal that the popup can at last perform
  * its intended task.
  */
-browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
-  if (message.command == 'tabs') {
-    browser.tabs.query({currentWindow: true})
+
+const informContentScriptToUpdateCandidates = function(isInitialization) {
+  browser.tabs.query({currentWindow: true})
       .then((tabs) => {
         const activeTab = tabs.find((tab) => {return tab.active});
-        browser.tabs.sendMessage(activeTab.id, {info: 'tabs', tabs: tabs, activeTab: activeTab});
+        browser.tabs.sendMessage(activeTab.id, {info: 'tabs', tabs: tabs, activeTab: activeTab, isInitialization: isInitialization});
       });
+};
+
+browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
+  if (message.command == 'tabs') {
+    informContentScriptToUpdateCandidates(true);
   }
   else if (message.command == "activate") {
     browser.tabs.update(message.tabId, {active: true});
   }
 });
+
+browser.tabs.onUpdated.addListener(() => { informContentScriptToUpdateCandidates(false) });
+browser.tabs.onRemoved.addListener(() => { informContentScriptToUpdateCandidates(false) });
+browser.tabs.onCreated.addListener(() => { informContentScriptToUpdateCandidates(false) });

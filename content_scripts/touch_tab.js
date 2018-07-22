@@ -102,6 +102,7 @@
         if (prevP) {
           this.deactivateCandidateElem(activeP);
           this.activateCandidateElem(prevP);
+          prevP.scrollIntoView({block: 'center'});
           return;
         }
       }
@@ -113,6 +114,7 @@
           this.deactivateCandidateElem(activeP);
         }
         this.activateCandidateElem(lastChildP);
+        lastChildP.scrollIntoView({block: 'center'});
       }
     };
 
@@ -122,7 +124,6 @@
 
     this.activateCandidateElem = function(candidateElem) {
       candidateElem.classList.add('active');
-      candidateElem.scrollIntoView({block: 'center'});
       const tabId = this.extractIdFromCandidateElem_(candidateElem);
 
       const self = this;
@@ -189,37 +190,48 @@
       var xhttp = new XMLHttpRequest();
       xhttp.onreadystatechange = function() {
         if (this.readyState == 4 && this.status == 200) {
-          div.innerHTML = this.responseText;
-          div.style.pointerEvents = 'all';
-          div.classList.add('opened');
-          
-          // Add listeners so that clicking outside of content removes it
-          content = document.querySelector('.touch-tab--content');
-          content.addEventListener('click', (evt) => {
-            cancelBubble(evt);
-          });
-          div.addEventListener('click', (evt) => {
-            closeTouchTab();
-          });
+          if (message.isInitialization) {
+            div.innerHTML = this.responseText;
+            div.style.pointerEvents = 'all';
+            div.classList.add('opened');
+            
+            // Add listeners so that clicking outside of content removes it
+            content = document.querySelector('.touch-tab--content');
+            content.addEventListener('click', (evt) => {
+              cancelBubble(evt);
+            });
+            div.addEventListener('click', (evt) => {
+              closeTouchTab();
+            });
 
-          // Add a focus listener to the input
-          var input = document.querySelector('.touch-tab--filter');
-          input.addEventListener('focus', (evt) => {
-            div.classList.add('active');
-          });
-          // Add blur listener to the input
-          input.addEventListener('blur', (evt) => {
-            div.classList.remove('active');
-          });
+            // Add a focus listener to the input
+            var input = document.querySelector('.touch-tab--filter');
+            input.addEventListener('focus', (evt) => {
+              div.classList.add('active');
+            });
+            // Add blur listener to the input
+            input.addEventListener('blur', (evt) => {
+              div.classList.remove('active');
+            });
 
-          // Focus on the input
-          input.focus();
+            // Focus on the input
+            input.focus();
 
-          // Populate container with tab candidates
-          const tabs = message.tabs;
-          const activeTab = message.activeTab;
-          const container = document.querySelector('.touch-tab--candidates-container');
-          candidateTabsManager.populateCandidateTabsContainer(tabs, container, activeTab.id);
+            // Populate container with tab candidates
+            const tabs = message.tabs;
+            const activeTab = message.activeTab;
+            const container = document.querySelector('.touch-tab--candidates-container');
+            candidateTabsManager.populateCandidateTabsContainer(tabs, container, activeTab.id);
+            const activeP = document.getElementById('touch-tab--' + activeTab.id);
+            activeP.scrollIntoView({block: 'center'});
+          }
+          else {
+            // Populate container with tab candidates
+            const tabs = message.tabs;
+            const activeTab = message.activeTab;
+            const container = document.querySelector('.touch-tab--candidates-container');
+            candidateTabsManager.populateCandidateTabsContainer(tabs, container, activeTab.id);
+          }
         } else {
           console.log('files not found');
         }

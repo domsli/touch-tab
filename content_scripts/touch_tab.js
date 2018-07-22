@@ -25,10 +25,21 @@
   };
 
   const CandidateTabsManager = function() {
-    this.populateCandidateTabsContainer = function(tabs, container, activeTabId) {
+    this.populateCandidateTabsContainer = function(filter, tabs, container, activeTabId) {
       container.innerHTML = "";
+      // filter tabs
+      tabs = tabs.filter((tab) => {
+        const urlStr = tab.url.toLowerCase();
+        const titleStr = tab.title.toLowerCase();
+        return (urlStr.includes(filter) || titleStr.includes(filter));
+      });
+      // find a tab to activate
       const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
       let idOfTabToActivate = (selectedTabId != null) ? selectedTabId : activeTabId;
+      if (!tabs.find((tab) => {return tab.id == idOfTabToActivate}) && tabs.length > 0) {
+        idOfTabToActivate = tabs[0].id;
+      }
+      // loop through the tabs and populate them into container
       for (let tab of tabs) {
         const row = document.createElement('tr');
         row.setAttribute('id', 'touch-tab--' + tab.id);
@@ -221,16 +232,24 @@
             const tabs = message.tabs;
             const activeTab = message.activeTab;
             const container = document.querySelector('.touch-tab--candidates-container');
-            candidateTabsManager.populateCandidateTabsContainer(tabs, container, activeTab.id);
+            candidateTabsManager.populateCandidateTabsContainer(input.value, tabs, container, activeTab.id);
             const activeP = document.getElementById('touch-tab--' + activeTab.id);
             activeP.scrollIntoView({block: 'center'});
+          
+            // Add input listener to filter
+            input.addEventListener('input', (evt) => {
+              const filter = input.value;
+              candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id)
+            });
           }
           else {
             // Populate container with tab candidates
+            var input = document.querySelector('.touch-tab--filter');
+            const filter = input.value;
             const tabs = message.tabs;
             const activeTab = message.activeTab;
             const container = document.querySelector('.touch-tab--candidates-container');
-            candidateTabsManager.populateCandidateTabsContainer(tabs, container, activeTab.id);
+            candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id);
           }
         } else {
           console.log('files not found');

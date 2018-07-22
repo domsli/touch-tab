@@ -1,6 +1,13 @@
-#touch-tab {
+#touch-tab div {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+}
+
+#touch-tab * {
     font-family: arial, sans-serif;
-    box-sizing: content-box;
 }
 
 #touch-tab {
@@ -17,7 +24,7 @@
     align-items: center;
     pointer-events: none;
 
-    background-color: none;
+    background-color: transparent;
     -moz-transition: background-color 0.2s;
     -moz-transition-timing-function: linear;
 }
@@ -37,6 +44,7 @@
 }
 
 #touch-tab .touch-tab--components {
+    width: 100%;
     height: 100%;
 }
 

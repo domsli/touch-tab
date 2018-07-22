@@ -98,6 +98,7 @@
         if (nextP) {
           this.deactivateCandidateElem(activeP);
           this.activateCandidateElem(nextP);
+          nextP.scrollIntoView({block: 'center'});
           return;
         }
       }
@@ -109,6 +110,7 @@
           this.deactivateCandidateElem(activeP);
         }
         this.activateCandidateElem(firstChildP);
+        firstChildP.scrollIntoView({block: 'center'});
       }
     };
 

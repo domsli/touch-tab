@@ -136,10 +136,54 @@
     margin: 10px 0 10px 0;
 }
 
+#touch-tab div.touch-tab--candidate-url-container {
+    position: relative;
+}
+
 #touch-tab p.touch-tab--candidate-url {
     font-size: 14px;
+    background-color: transparent;
     color: gray;
+    -moz-transition: background-color 0.1s linear,
+        color 0.1s linear;
     margin: 0 0 10px 0;
+}
+
+#touch-tab p.touch-tab--candidate-url.copied {
+    background-color: gray;
+    color: white;
+}
+
+#touch-tab span.touch-tab--tooltip {
+    font-size: 14px;
+    width: 140px;
+    background-color: #555;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 25000;
+    bottom: 125%;
+    left: 0;
+    opacity: 0;
+    -moz-transition: opacity 0.3s;
+}
+
+#touch-tab span.touch-tab--tooltip.shown {
+    opacity: 1;
+    -moz-transition: opacity 0.1s;
+}
+
+#touch-tab span.touch-tab--tooltip::after {
+    content: "";
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    margin-left: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: #555 transparent transparent transparent;
 }
 
 #touch-tab .touch-tab--candidate-close {

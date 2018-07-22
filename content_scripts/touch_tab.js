@@ -24,6 +24,16 @@
     div.removeChild(content);
   };
 
+  // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
+  const copyToClipboard = function(elem) {
+    var input = document.createElement('input');
+    input.setAttribute('value', elem.innerHTML);
+    document.body.appendChild(input);
+    input.select();
+    var result = document.execCommand('copy');
+    document.body.removeChild(input)
+  };
+
   const CandidateTabsManager = function() {
     const self = this;
 
@@ -62,10 +72,17 @@
         title.innerHTML = tab.title;
         titleUrlCell.appendChild(title);
         const br = document.createElement('br');
+        const urlContainer = document.createElement('div');
+        urlContainer.setAttribute('class', 'touch-tab--candidate-url-container');
         const url = document.createElement('p');
         url.setAttribute('class', 'touch-tab--candidate-url');
         url.innerHTML = tab.url;
-        titleUrlCell.appendChild(url);
+        urlContainer.append(url);
+        const tooltip = document.createElement('span');
+        tooltip.setAttribute('class', 'touch-tab--tooltip');
+        tooltip.innerHTML = "Copied to clipboard!";
+        urlContainer.appendChild(tooltip);
+        titleUrlCell.appendChild(urlContainer);
         row.appendChild(titleUrlCell);
         // create a cell for close button
         closeCell = document.createElement('td');
@@ -185,7 +202,7 @@
   // Listen to command keypresses
   document.addEventListener('keypress', (evt) => {
     // Ctrl+Alt+P is the main command to open popup
-    if (evt.ctrlKey & evt.altKey && evt.which == 112) {
+    if (evt.ctrlKey && evt.altKey && evt.key == "p") {
       // Close the Touch Tab content if it is already open
       if (isOpened()) {
         closeTouchTab();
@@ -194,6 +211,27 @@
       // script can create the content
       else {  
         browser.runtime.sendMessage({command: 'tabs'});
+      }
+    }
+    else if (evt.ctrlKey && evt.altKey && evt.key == "c") {
+      if (isOpened()) {
+        const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
+        if (selectedTabId != null) {
+          const candidateElem = document.getElementById('touch-tab--' + selectedTabId);
+          const url = candidateElem.querySelector('.touch-tab--candidate-url');
+          copyToClipboard(url);
+  
+          url.classList.add('copied');
+          setTimeout(() => {
+            url.classList.remove('copied');
+          }, 100);
+
+          const tooltip = candidateElem.querySelector('.touch-tab--tooltip');
+          tooltip.classList.add('shown');
+          setTimeout(() => {
+            tooltip.classList.remove('shown');
+          }, 700);
+        }
       }
     }
     else if (evt.key == "ArrowDown") {

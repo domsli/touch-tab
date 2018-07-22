@@ -20,7 +20,5 @@
       "css": ["touch_tab.css"],
       "js": ["content_scripts/touch_tab.js"]
     }
-  ],
-
-  "web_accessible_resources": ["touch_tab.html"]
+  ]
 }

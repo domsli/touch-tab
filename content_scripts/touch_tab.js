@@ -203,76 +203,98 @@
     }
   });
 
+  const createInitialHtml = function() {
+    // Create the elements
+    const content = document.createElement('div');
+    content.classList.add('touch-tab--content');
+
+    const components = document.createElement('div');
+    components.classList.add('touch-tab--components');
+
+    const filterContainer = document.createElement('div');
+    filterContainer.classList.add('touch-tab--filter-container');
+
+    const input = document.createElement('input');
+    input.classList.add('touch-tab--filter');
+    input.setAttribute('placeholder', "Type to filter...");
+
+    const filterUnderline = document.createElement('div');
+    filterUnderline.classList.add('touch-tab--filter-underline');
+
+    const candidatesContainer = document.createElement('table');
+    candidatesContainer.classList.add('touch-tab--candidates-container');
+    candidatesContainer.setAttribute('cellspacing', '0');
+
+    // Form relationships
+    content.appendChild(components);
+    components.appendChild(filterContainer);
+    components.appendChild(candidatesContainer);
+    filterContainer.appendChild(input);
+    filterContainer.appendChild(filterUnderline);
+
+    return content;
+  };
+
   // Listen to messages from the background script
   browser.runtime.onMessage.addListener((message) => {
     // Contruct container from tabs
     if (message.info == 'tabs') {
-      // AJAX request to fetch HTML
-      var xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function() {
-        if (this.readyState == 4 && this.status == 200) {
-          if (message.isInitialization) {
-            div.innerHTML = this.responseText;
-            div.style.pointerEvents = 'all';
-            div.classList.add('opened');
-            
-            // Add listeners so that clicking outside of content removes it
-            content = document.querySelector('.touch-tab--content');
-            content.addEventListener('click', (evt) => {
-              cancelBubble(evt);
-            });
-            div.addEventListener('click', (evt) => {
-              closeTouchTab();
-            });
+      if (message.isInitialization) {
+        div.appendChild(createInitialHtml());
+        div.style.pointerEvents = 'all';
+        div.classList.add('opened');
+        
+        // Add listeners so that clicking outside of content removes it
+        content = document.querySelector('.touch-tab--content');
+        content.addEventListener('click', (evt) => {
+          cancelBubble(evt);
+        });
+        div.addEventListener('click', (evt) => {
+          closeTouchTab();
+        });
 
-            // Add a focus listener to the input
-            var input = document.querySelector('.touch-tab--filter');
-            input.addEventListener('focus', (evt) => {
-              div.classList.add('active');
-            });
-            // Add blur listener to the input
-            input.addEventListener('blur', (evt) => {
-              div.classList.remove('active');
-            });
+        // Add a focus listener to the input
+        var input = document.querySelector('.touch-tab--filter');
+        input.addEventListener('focus', (evt) => {
+          div.classList.add('active');
+        });
+        // Add blur listener to the input
+        input.addEventListener('blur', (evt) => {
+          div.classList.remove('active');
+        });
 
-            // Focus on the input
-            input.focus();
+        // Focus on the input
+        input.focus();
 
-            // Populate container with tab candidates
-            const tabs = message.tabs;
-            const activeTab = message.activeTab;
-            const container = document.querySelector('.touch-tab--candidates-container');
-            candidateTabsManager.populateCandidateTabsContainer(input.value.toLowerCase(), tabs, container, activeTab.id);
-            const activeP = document.getElementById('touch-tab--' + activeTab.id);
-            activeP.scrollIntoView({block: 'center'});
-          
-            // Add input listener to filter
-            input.addEventListener('input', (evt) => {
-              const filter = input.value.toLowerCase();
-              candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id)
-            });
-          }
-          else {
-            const tabs = message.tabs;
-            // Update the TabSelectionManager if the selected tab is no longer available
-            const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
-            if (!tabs.find((tab) => {return tab.id == selectedTabId})) {
-              tabSelectionMaintainer.setSelectedTabId(null);
-            }
-
-            // Populate container with tab candidates
-            var input = document.querySelector('.touch-tab--filter');
-            const filter = input.value.toLowerCase();
-            const activeTab = message.activeTab;
-            const container = document.querySelector('.touch-tab--candidates-container');
-            candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id);
-          }
-        } else {
-          console.log('files not found');
+        // Populate container with tab candidates
+        const tabs = message.tabs;
+        const activeTab = message.activeTab;
+        const container = document.querySelector('.touch-tab--candidates-container');
+        candidateTabsManager.populateCandidateTabsContainer(input.value.toLowerCase(), tabs, container, activeTab.id);
+        const activeP = document.getElementById('touch-tab--' + activeTab.id);
+        activeP.scrollIntoView({block: 'center'});
+      
+        // Add input listener to filter
+        input.addEventListener('input', (evt) => {
+          const filter = input.value.toLowerCase();
+          candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id)
+        });
+      }
+      else {
+        const tabs = message.tabs;
+        // Update the TabSelectionManager if the selected tab is no longer available
+        const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
+        if (!tabs.find((tab) => {return tab.id == selectedTabId})) {
+          tabSelectionMaintainer.setSelectedTabId(null);
         }
-      };
-      xhttp.open("GET", chrome.extension.getURL("/touch_tab.html"), true);
-      xhttp.send();
+
+        // Populate container with tab candidates
+        var input = document.querySelector('.touch-tab--filter');
+        const filter = input.value.toLowerCase();
+        const activeTab = message.activeTab;
+        const container = document.querySelector('.touch-tab--candidates-container');
+        candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id);
+      }
     }
   });
 

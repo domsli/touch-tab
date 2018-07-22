@@ -22,6 +22,7 @@ browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   }
 });
 
+browser.tabs.onActivated.addListener(() => { informContentScriptToUpdateCandidates(false) });
 browser.tabs.onUpdated.addListener(() => { informContentScriptToUpdateCandidates(false) });
 browser.tabs.onRemoved.addListener(() => { informContentScriptToUpdateCandidates(false) });
 browser.tabs.onCreated.addListener(() => { informContentScriptToUpdateCandidates(false) });

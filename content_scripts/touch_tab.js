@@ -83,6 +83,10 @@
       return this.selectedTabId;
     };
 
+    this.setSelectedTabId = function(tabId) {
+      this.selectedTabId = tabId;
+    }
+
     this.down = function() {
       if (this.selectedTabId != null) {
         const activeP = document.getElementById('touch-tab--' + this.selectedTabId);
@@ -243,10 +247,16 @@
             });
           }
           else {
+            const tabs = message.tabs;
+            // Update the TabSelectionManager if the selected tab is no longer available
+            const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
+            if (!tabs.find((tab) => {return tab.id == selectedTabId})) {
+              tabSelectionMaintainer.setSelectedTabId(null);
+            }
+
             // Populate container with tab candidates
             var input = document.querySelector('.touch-tab--filter');
             const filter = input.value;
-            const tabs = message.tabs;
             const activeTab = message.activeTab;
             const container = document.querySelector('.touch-tab--candidates-container');
             candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id);

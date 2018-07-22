@@ -197,6 +197,7 @@
         const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
         if (selectedTabId != null) {
           browser.runtime.sendMessage({command: 'activate', tabId: selectedTabId});
+          closeTouchTab();
         }
       }
     }

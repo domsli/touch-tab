@@ -163,7 +163,7 @@
     else if (evt.key == "Enter") {
       if (isOpened()) {
         const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
-        if (selectedTabId) {
+        if (selectedTabId != null) {
           browser.runtime.sendMessage({command: 'activate', tabId: selectedTabId});
         }
       }

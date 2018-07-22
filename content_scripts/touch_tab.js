@@ -70,6 +70,9 @@
         if (idOfTabToActivate != null && tab.id == idOfTabToActivate) {
           tabSelectionMaintainer.activateCandidateElem(row);
         }
+        if (tab.id == activeTabId) {
+          row.classList.add('activeTab');
+        }
       }
     };
 

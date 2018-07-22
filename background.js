@@ -20,6 +20,12 @@ browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   else if (message.command == "activate") {
     browser.tabs.update(message.tabId, {active: true});
   }
+  else if (message.command == 'remove') {
+    browser.tabs.remove(message.tabId)
+      .then(() => {
+        informContentScriptToUpdateCandidates(false);  
+      });
+  }
 });
 
 browser.tabs.onActivated.addListener(() => { informContentScriptToUpdateCandidates(false) });

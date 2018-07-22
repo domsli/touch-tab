@@ -67,6 +67,13 @@
         url.innerHTML = tab.url;
         titleUrlCell.appendChild(url);
         row.appendChild(titleUrlCell);
+        // create a cell for close button
+        closeCell = document.createElement('td');
+        closeCell.classList.add('touch-tab--candidate-close');
+        closeButton = document.createElement('div');
+        closeButton.classList.add('close');
+        closeCell.appendChild(closeButton);
+        row.appendChild(closeCell);
         container.appendChild(row);
 
         if (idOfTabToActivate != null && tab.id == idOfTabToActivate) {
@@ -77,6 +84,12 @@
           const tabId = self.extractIdFromCandidateElem_(row);
           browser.runtime.sendMessage({command: 'activate', tabId: tabId});
           closeTouchTab();
+        });
+
+        closeButton.addEventListener('click', (evt) => {
+          cancelBubble(evt);
+          const tabId = self.extractIdFromCandidateElem_(row);
+          browser.runtime.sendMessage({command: 'remove', tabId: tabId});
         });
       }
     };

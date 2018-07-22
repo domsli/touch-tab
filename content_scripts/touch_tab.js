@@ -236,13 +236,13 @@
             const tabs = message.tabs;
             const activeTab = message.activeTab;
             const container = document.querySelector('.touch-tab--candidates-container');
-            candidateTabsManager.populateCandidateTabsContainer(input.value, tabs, container, activeTab.id);
+            candidateTabsManager.populateCandidateTabsContainer(input.value.toLowerCase(), tabs, container, activeTab.id);
             const activeP = document.getElementById('touch-tab--' + activeTab.id);
             activeP.scrollIntoView({block: 'center'});
           
             // Add input listener to filter
             input.addEventListener('input', (evt) => {
-              const filter = input.value;
+              const filter = input.value.toLowerCase();
               candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id)
             });
           }
@@ -256,7 +256,7 @@
 
             // Populate container with tab candidates
             var input = document.querySelector('.touch-tab--filter');
-            const filter = input.value;
+            const filter = input.value.toLowerCase();
             const activeTab = message.activeTab;
             const container = document.querySelector('.touch-tab--candidates-container');
             candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id);

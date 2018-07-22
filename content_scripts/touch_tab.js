@@ -25,6 +25,8 @@
   };
 
   const CandidateTabsManager = function() {
+    const self = this;
+
     this.populateCandidateTabsContainer = function(filter, tabs, container, activeTabId) {
       container.innerHTML = "";
       // filter tabs
@@ -70,9 +72,12 @@
         if (idOfTabToActivate != null && tab.id == idOfTabToActivate) {
           tabSelectionMaintainer.activateCandidateElem(row);
         }
-        if (tab.id == activeTabId) {
-          row.classList.add('activeTab');
-        }
+
+        row.addEventListener('click', (evt) => {
+          const tabId = self.extractIdFromCandidateElem_(row);
+          browser.runtime.sendMessage({command: 'activate', tabId: tabId});
+          closeTouchTab();
+        });
       }
     };
 

@@ -42,23 +42,34 @@
     const self = this;
 
     this.openPreview = function(candidateElem, url) {
+      const candidatesContainer = document.querySelector('.touch-tab--candidates-container');
+      const numRows = candidatesContainer.rows.length;
       const preview = document.createElement('img');
       preview.setAttribute('class', 'touch-tab--preview');
       preview.setAttribute('src', url);
       candidateElem.appendChild(preview);
       const rowHeight = 18 + 18 + 10 + 10 + 10;
-      const previewHeight = (screen.height * 2) / 5;
-      if (previewHeight <= (candidateElem.rowIndex + 1) * rowHeight) {
-        preview.style.bottom = '125%';
-        preview.style.left = "0";
-      }
-      else if (previewHeight/2 <= (candidateElem.rowIndex) * rowHeight) {
+      const previewHeight = (screen.height) / 2;
+
+      // Check for whether or not the preview can be shown in the center and
+      // do so if possible
+      if (previewHeight/2 <= (candidateElem.rowIndex) * rowHeight &&
+        previewHeight/2 <= (numRows - 1 - candidateElem.rowIndex) * rowHeight) {
         preview.style.top = ((rowHeight-previewHeight)/2).toString() + "px";
-        preview.style.left = "20vw";
+        preview.style.left = "10vw";
+        preview.scrollIntoView({inline: 'center'});
       }
-      else {
+      // If preview does not fit on top, then show on bottom
+      else if (previewHeight > (candidateElem.rowIndex) * rowHeight) {
         preview.style.top = '125%';
         preview.style.left = "0";
+        preview.scrollIntoView({block: 'end'});
+      }
+      // Lastly, default to showing the preview on the top
+      else {
+        preview.style.bottom = '125%';
+        preview.style.left = "0";
+        preview.scrollIntoView({block: 'start'});
       }
     };
 
@@ -270,6 +281,7 @@
         if (selectedTabId != null) {
           const candidateElem = document.getElementById('touch-tab--' + selectedTabId);
           const url = candidateElem.querySelector('.touch-tab--candidate-url');
+          candidateElem.scrollIntoView({block: 'center'});
           copyToClipboard(url);
   
           url.classList.add('copied');

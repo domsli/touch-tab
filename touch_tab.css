@@ -104,14 +104,11 @@
 
 #touch-tab img.touch-tab--preview {
     position: absolute;
-    font-size: 14px;
-    width: 40vw;
+    z-index: 25000;
+    width: 50vw;
     background-color: #555;
-    color: white;
-    text-align: center;
     border-radius: 6px;
     padding: 5px;
-    z-index: 25000;
 }
 
 #touch-tab td.touch-tab--candidate-favicon {
@@ -171,6 +168,8 @@
 }
 
 #touch-tab span.touch-tab--tooltip {
+    position: absolute;
+    z-index: 25000;
     font-size: 14px;
     width: 140px;
     background-color: #555;
@@ -178,8 +177,6 @@
     text-align: center;
     border-radius: 6px;
     padding: 5px;
-    position: absolute;
-    z-index: 25000;
     bottom: 125%;
     left: 0;
     opacity: 0;

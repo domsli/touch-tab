@@ -81,14 +81,15 @@
 #touch-tab .touch-tab--candidates-container {
     display: block;
     table-layout: fixed;
+    height: 100%;
     max-height: calc(100% - 10px - 5px - 24px);
     overflow-y: auto;
 }
 
 #touch-tab tr.touch-tab--candidate {
     display: inline-block;
+    position: relative;
     width: 100%;
-    height: -moz-fit-content;
 }
 
 #touch-tab tr.touch-tab--candidate:hover:not(.active) {
@@ -97,6 +98,18 @@
 
 #touch-tab .touch-tab--candidate.active {
     background-color: rgba(211, 211, 211, 0.7);
+}
+
+#touch-tab img.touch-tab--preview {
+    position: absolute;
+    font-size: 14px;
+    width: 40vw;
+    background-color: #555;
+    color: white;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    z-index: 25000;
 }
 
 #touch-tab td.touch-tab--candidate-favicon {

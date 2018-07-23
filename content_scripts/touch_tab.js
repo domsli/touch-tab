@@ -7,16 +7,20 @@
   div.setAttribute('id', 'touch-tab');
   document.body.appendChild(div);
 
-  function cancelBubble(e) {
+  const removeElem = function(elem) {
+    elem.parentNode.removeChild(elem);
+  };
+
+  const cancelBubble = function(e) {
     var evt = e ? e:window.event;
     if (!evt) return;
     if (evt.stopPropagation) evt.stopPropagation();
     if (evt.cancelBubble != null) evt.cancelBubble = true;
-  }
+  };
 
   const isOpened = function() {
     return div.classList.contains('opened');
-  }
+  };
 
   const closeTouchTab = function() {
     div.classList.remove('opened');
@@ -32,6 +36,40 @@
     input.select();
     var result = document.execCommand('copy');
     document.body.removeChild(input)
+  };
+
+  const PreviewManager = function() {
+    const self = this;
+
+    this.openPreview = function(candidateElem, url) {
+      const preview = document.createElement('img');
+      preview.setAttribute('class', 'touch-tab--preview');
+      preview.setAttribute('src', url);
+      candidateElem.appendChild(preview);
+      const rowHeight = 18 + 18 + 10 + 10 + 10;
+      const previewHeight = (screen.height * 2) / 5;
+      if (previewHeight <= (candidateElem.rowIndex + 1) * rowHeight) {
+        preview.style.bottom = '125%';
+        preview.style.left = "0";
+      }
+      else if (previewHeight/2 <= (candidateElem.rowIndex) * rowHeight) {
+        preview.style.top = ((rowHeight-previewHeight)/2).toString() + "px";
+        preview.style.left = "20vw";
+      }
+      else {
+        preview.style.top = '125%';
+        preview.style.left = "0";
+      }
+    };
+
+    this.closePreviewIfOpen = function() {
+      const preview = document.querySelector('.touch-tab--preview');
+      if (preview) {
+        removeElem(preview);
+      }
+    };
+
+    return this;
   };
 
   const CandidateTabsManager = function() {
@@ -116,6 +154,15 @@
 
   const TabSelectionMaintainer = function() {
     this.selectedTabId = null;
+    this.myId = null;
+
+    this.getMyId = function() {
+      return this.myId;
+    };
+
+    this.setMyId = function(tabId) {
+      this.myId = tabId;
+    };
 
     this.getSelectedTabId = function() {
       return this.selectedTabId;
@@ -123,9 +170,11 @@
 
     this.setSelectedTabId = function(tabId) {
       this.selectedTabId = tabId;
-    }
+    };
 
     this.down = function() {
+      previewManager.closePreviewIfOpen();
+
       if (this.selectedTabId != null) {
         const activeP = document.getElementById('touch-tab--' + this.selectedTabId);
         const nextP = activeP.nextSibling;
@@ -150,6 +199,8 @@
     };
 
     this.up = function() {
+      previewManager.closePreviewIfOpen();
+
       if (this.selectedTabId != null) {
         const activeP = document.getElementById('touch-tab--' + this.selectedTabId);
         const prevP = activeP.previousSibling;
@@ -198,6 +249,7 @@
 
   const tabSelectionMaintainer = TabSelectionMaintainer();
   const candidateTabsManager = CandidateTabsManager();
+  const previewManager = PreviewManager();
 
   // Listen to command keypresses
   document.addEventListener('keypress', (evt) => {
@@ -231,6 +283,22 @@
           setTimeout(() => {
             tooltip.classList.remove('shown');
           }, 700);
+        }
+      }
+    }
+    else if (evt.ctrlKey && evt.altKey && evt.key == "z") {
+      if (isOpened()) {
+        const preview = document.querySelector('.touch-tab--preview');
+        // Close preview if it exists
+        if (preview) {
+          removeElem(preview);
+        }
+        // Open a preview if one does not exist
+        else {
+          const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
+          if (selectedTabId != null) {
+            browser.runtime.sendMessage({command: 'captureTab', tabId: selectedTabId, myId: tabSelectionMaintainer.getMyId()});
+          }
         }
       }
     }
@@ -296,6 +364,10 @@
     // Contruct container from tabs
     if (message.info == 'tabs') {
       if (message.isInitialization) {
+        // Set my ID
+        tabSelectionMaintainer.setMyId(message.activeTab.id);
+
+        // Load HTML
         div.appendChild(createInitialHtml());
         div.style.pointerEvents = 'all';
         div.classList.add('opened');
@@ -351,6 +423,11 @@
         const container = document.querySelector('.touch-tab--candidates-container');
         candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id);
       }
+    }
+    else if (message.info == 'capturedTab') {
+      // Create the preview and add it as a child
+      const candidateElem = document.getElementById('touch-tab--' + message.tabId);
+      previewManager.openPreview(candidateElem, message.url);
     }
   });
 

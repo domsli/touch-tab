@@ -26,6 +26,12 @@ browser.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         informContentScriptToUpdateCandidates(false);  
       });
   }
+  else if (message.command == 'captureTab') {
+    browser.tabs.captureTab(message.tabId)
+      .then((url) => {
+        browser.tabs.sendMessage(message.myId, {info: 'capturedTab', tabId: message.tabId, url: url});
+      });
+  }
 });
 
 browser.tabs.onActivated.addListener(() => { informContentScriptToUpdateCandidates(false) });

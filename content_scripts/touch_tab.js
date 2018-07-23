@@ -30,12 +30,20 @@
 
   // https://stackoverflow.com/questions/400212/how-do-i-copy-to-the-clipboard-in-javascript
   const copyToClipboard = function(elem) {
+    // Store whether or not the filter input was focused
+    const filterInput = document.querySelector('.touch-tab--filter');
+    const wasFilterFocused = filterInput == document.activeElement;
+    // Copy to clipboard
     var input = document.createElement('input');
     input.setAttribute('value', elem.innerHTML);
     document.body.appendChild(input);
     input.select();
     var result = document.execCommand('copy');
-    document.body.removeChild(input)
+    document.body.removeChild(input);
+    // Restore focus if the filter was focused on
+    if (wasFilterFocused) {
+      filterInput.focus();
+    }
   };
 
   const PreviewManager = function() {
@@ -295,6 +303,12 @@
             tooltip.classList.remove('shown');
           }, 700);
         }
+      }
+    }
+    else if (evt.ctrlKey && evt.altKey && evt.key == "f") {
+      if (isOpened()) {
+        const input = document.querySelector('.touch-tab--filter');
+        input.focus();
       }
     }
     else if (evt.ctrlKey && evt.altKey && evt.key == "z") {

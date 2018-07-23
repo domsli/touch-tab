@@ -1,9 +1,11 @@
-#touch-tab div {
+#touch-tab div, #touch-tab table, #touch-tab td,
+#touch-tab tr {
     width: 100%;
     margin: 0;
     padding: 0;
     border: 0;
     border-radius: 0;
+    background-color: transparent;
 }
 
 #touch-tab * {
@@ -128,6 +130,7 @@
 
 #touch-tab .touch-tab--candidate-favicon img {
     position: absolute;
+    height: 32px !important;
     top: 50%;
     transform: translate(0, -50%);
     margin: 0 15px 0 5px;
@@ -220,7 +223,7 @@
   opacity: 1;
 }
 
-#touch-tab .close:before, .close:after {
+#touch-tab .close:before, #touch-tab .close:after {
   position: absolute;
   left: 8px;
   content: ' ';

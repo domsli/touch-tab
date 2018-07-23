@@ -97,7 +97,6 @@
         // create a cell for icon
         const favicon = document.createElement('img');
         favicon.setAttribute('src', tab.favIconUrl);
-        favicon.setAttribute('height', '32px');
         const iconCell = document.createElement('td');
         iconCell.setAttribute('class', 'touch-tab--candidate-favicon');
         iconCell.appendChild(favicon);

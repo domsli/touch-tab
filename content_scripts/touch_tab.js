@@ -265,6 +265,63 @@
     return this;
   };
 
+  const InputManager = function() {
+    const self = this;
+
+    this.registeredListener = null;
+
+    this.updateListener = function(tabs, container) {
+      this.removeChangeListener();
+      this.registerChangeListener(tabs, container);
+    };
+
+    this.initializeInput = function(tabs, container) {
+      // Add a focus listener to the input
+      var input = this.getInput();
+      input.addEventListener('focus', (evt) => {
+        div.classList.add('active');
+      });
+      // Add blur listener to the input
+      input.addEventListener('blur', (evt) => {
+        div.classList.remove('active');
+      });
+
+      this.focusInput();
+
+      // Register change listener
+      this.registerChangeListener(tabs, container);
+    };
+
+    this.getInput = function() {
+      const input = document.querySelector('.touch-tab--filter');
+      return input;
+    };
+
+    this.focusInput = function() {
+      this.getInput().focus();
+    };
+
+    this.registerChangeListener = function(tabs, container) {
+      const input = this.getInput();
+      this.registeredListener = (evt) => {
+        const filter = input.value.toLowerCase();
+        candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container,
+          tabSelectionMaintainer.getMyId());
+      };
+      // Add input listener to filter
+      input.addEventListener('input', this.registeredListener);
+    };
+
+    this.removeChangeListener = function() {
+      const input = this.getInput();
+      input.removeEventListener('input', this.registeredListener);
+    };
+
+    return this;
+  };
+
+  let isInitialized = false;
+  const inputManager = InputManager();
   const tabSelectionMaintainer = TabSelectionMaintainer();
   const candidateTabsManager = CandidateTabsManager();
   const previewManager = PreviewManager();
@@ -389,6 +446,8 @@
     // Contruct container from tabs
     if (message.info == 'tabs') {
       if (message.isInitialization) {
+        isInitialized = true;
+
         // Set my ID
         tabSelectionMaintainer.setMyId(message.activeTab.id);
 
@@ -406,34 +465,18 @@
           closeTouchTab();
         });
 
-        // Add a focus listener to the input
-        var input = document.querySelector('.touch-tab--filter');
-        input.addEventListener('focus', (evt) => {
-          div.classList.add('active');
-        });
-        // Add blur listener to the input
-        input.addEventListener('blur', (evt) => {
-          div.classList.remove('active');
-        });
-
-        // Focus on the input
-        input.focus();
-
         // Populate container with tab candidates
         const tabs = message.tabs;
         const activeTab = message.activeTab;
         const container = document.querySelector('.touch-tab--candidates-container');
-        candidateTabsManager.populateCandidateTabsContainer(input.value.toLowerCase(), tabs, container, activeTab.id);
+        candidateTabsManager.populateCandidateTabsContainer("", tabs, container, activeTab.id);
         const activeP = document.getElementById('touch-tab--' + activeTab.id);
         activeP.scrollIntoView({block: 'center'});
-      
-        // Add input listener to filter
-        input.addEventListener('input', (evt) => {
-          const filter = input.value.toLowerCase();
-          candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id)
-        });
+
+        // Initialize the input
+        inputManager.initializeInput(tabs, container);
       }
-      else {
+      else if (isInitialized) {
         const tabs = message.tabs;
         // Update the TabSelectionManager if the selected tab is no longer available
         const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
@@ -442,11 +485,14 @@
         }
 
         // Populate container with tab candidates
-        var input = document.querySelector('.touch-tab--filter');
-        const filter = input.value.toLowerCase();
+        const input = document.querySelector('.touch-tab--filter');
+        const filter = inputManager.getInput().value.toLowerCase();
         const activeTab = message.activeTab;
         const container = document.querySelector('.touch-tab--candidates-container');
         candidateTabsManager.populateCandidateTabsContainer(filter, tabs, container, activeTab.id);
+
+        // Re-register the listener
+        inputManager.updateListener(tabs, container);
       }
     }
     else if (message.info == 'capturedTab') {

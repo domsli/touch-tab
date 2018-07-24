@@ -105,8 +105,13 @@
       // find a tab to activate
       const selectedTabId = tabSelectionMaintainer.getSelectedTabId();
       let idOfTabToActivate = (selectedTabId != null) ? selectedTabId : activeTabId;
-      if (!tabs.find((tab) => {return tab.id == idOfTabToActivate}) && tabs.length > 0) {
-        idOfTabToActivate = tabs[0].id;
+      if (!tabs.find((tab) => {return tab.id == idOfTabToActivate})) {
+        if (tabs.length > 0) {
+          idOfTabToActivate = tabs[0].id;
+        }
+        else {
+          tabSelectionMaintainer.setSelectedTabId(null);
+        }
       }
       // loop through the tabs and populate them into container
       for (let tab of tabs) {
